@@ -1,0 +1,179 @@
+CREATE TABLE Usuario (
+	ID INT not null identity (1,1)
+	,Login CHAR not null
+	,senha CHAR not null
+	,DTExpiracao DATETIME not null CONSTRAINT dfDtExpiracao DEFAULT (01/01/1900)
+	,CONSTRAINT pkUsuario PRIMARY KEY (ID)
+	,CONSTRAINT uqLogin UNIQUE(Login)
+);
+
+CREATE TABLE Coordenador (
+    ID INT not null identity(1,1)
+    ,Id_Usuario INT not null
+    ,Nome CHAR not null
+    ,Email CHAR not null
+    ,Celular INT not null
+    ,CONSTRAINT pkCoordenador PRIMARY KEY (ID)
+    ,CONSTRAINT fkEmprestimo FOREIGN KEY (Id_usuario) references Usuario(ID)
+    ,CONSTRAINT uqCoordenador UNIQUE (Email, Celular)
+);
+
+CREATE TABLE Aluno (
+    ID INT not null identity (1,1)
+    ,Id_usuario INT not null
+    ,Nome CHAR not null
+    ,Email CHAR not null
+    ,Celular INT not null
+    ,RA INT not null
+    ,Foto CHAR
+    ,CONSTRAINT pkAluno PRIMARY KEY (ID)
+    ,CONSTRAINT fkAluno FOREIGN KEY (Id_usuario) REFERENCES Usuario(ID)
+    ,CONSTRAINT uqAluno UNIQUE (Email, Celular)
+);
+
+CREATE TABLE Professor(
+    ID INT not null identity (1,1)
+    ,Id_usuario INT not null
+    ,Email CHAR not null
+    ,Celular INT not null
+    ,Apelido CHAR not null
+    ,CONSTRAINT pkProfessor PRIMARY KEY (ID)
+    ,CONSTRAINT fkProfessor FOREIGN KEY (Id_usuario) REFERENCES Usuario(ID)
+    ,CONSTRAINT uqProfessor UNIQUE (Email, Celular)
+);
+
+CREATE TABLE Disciplina (
+    ID INT not null IDENTITY(1,1)
+    ,Nome CHAR not null
+    ,Data DATE not null CONSTRAINT dfData DEFAULT (GETDATE())
+    ,Status CHAR not null CONSTRAINT dfStatus DEFAULT 'Aberto'
+    ,PlanoDeEnsino CHAR not null
+    ,CargaHoraria TINYINT not null 
+    ,Competencias CHAR not null
+    ,Habilidade CHAR not null
+    ,Ementa CHAR not null
+    ,Conteudo CHAR not null
+    ,BibliografiaBasica CHAR not null
+    ,BibliografiaComplementar CHAR not null
+    ,PercentualPratico INT not null
+    ,PercentualTeorico TINYINT not null
+    ,IdCoordenador INT not null
+    ,CONSTRAINT pkDisciplina PRIMARY KEY (ID)
+    ,CONSTRAINT fkDisciplica FOREIGN KEY (IdCoordenador) REFERENCES Coordenador(ID)
+    ,CONSTRAINT uqDisciplina UNIQUE (Nome)
+    ,CONSTRAINT ckCargaHoraria CHECK (CargaHoraria LIKE 40 OR CargaHoraria LIKE 80)
+    ,CONSTRAINT ckPercentualPratico CHECK (PercentualPratico BETWEEN 00 AND 100)
+    ,CONSTRAINT ckPercentualTeorico CHECK (PercentualTeorico BETWEEN 00 AND 100)
+    ,CONSTRAINT ckStatus CHECK (Status LIKE 'Aberto' OR Status LIKE 'Fechada')
+);
+
+CREATE TABLE CURSO (
+    ID INT not null 
+    ,Nome CHAR not null
+    ,CONSTRAINT pkCurso PRIMARY KEY (ID)
+    ,CONSTRAINT uqNome UNIQUE (Nome)
+);
+
+CREATE TABLE DisplinaOfertada (
+    ID INT not null
+    ,IdCoordenador INT not null
+    ,DtInicioMatricula DATETIME
+    ,DtFimMatricula DATETIME
+    ,IdDisciplina INT not null
+    ,IdCurso INT not null
+    ,Ano DATETIME not null
+    ,Semestre INT not null
+    ,Turma CHAR not null
+    ,IdProfessor INT
+    ,Metodologia CHAR
+    ,Recursos CHAR
+    ,CriterioAvalicao INT
+    ,PlanoDeAulas CHAR
+    ,CONSTRAINT pkDisci PRIMARY KEY (ID)
+    ,CONSTRAINT fkIdCoordenador FOREIGN KEY (IdCoordenador) REFERENCES Coordenador(ID)
+    ,CONSTRAINT fkIdDiscip FOREIGN KEY (IdDisciplina) REFERENCES Disciplina(ID)
+    ,CONSTRAINT fkIdCurso FOREIGN KEY (IdCurso) REFERENCES Curso(ID)
+    ,CONSTRAINT fkIdProfessor FOREIGN KEY (IdProfessor) REFERENCES Professor(ID)
+    ,CONSTRAINT ckAno CHECK (Ano BETWEEN 1900 AND 2100)
+    ,CONSTRAINT ckSemestre CHECK (Semestre BETWEEN 1 AND 2)
+    ,CONSTRAINT ckTurma CHECK (Turma BETWEEN 'a' AND 'z')
+);
+
+CREATE TABLE SolicitacaoMatricula (
+    ID INT not null IDENTITY(1,1)
+    ,IdAluno INT not null 
+    ,IdDisciplinaOfertada INT not null
+    ,DtSolicitacao DATETIME not null CONSTRAINT dfDtSolicitacao DEFAULT(GETDATE())
+    ,IdCoordenador INT
+    ,Status CHAR CONSTRAINT dfStat DEFAULT 'Solicitado'
+    ,CONSTRAINT pkSolicitacaoMatricula PRIMARY KEY (ID)
+    ,CONSTRAINT fkIdAluno FOREIGN KEY(IdAluno) REFERENCES Aluno(ID)
+    ,CONSTRAINT fkIdDisciplinaOfertada FOREIGN KEY (IdDisciplinaOfertada) REFERENCES DisplinaOfertada (ID)
+    ,CONSTRAINT fkIdCoorden FOREIGN KEY (IdCoordenador) REFERENCES Coordenador(ID)
+    ,CONSTRAINT ckStat CHECK (Status LIKE 'Solicitada' OR Status LIKE 'Aprovada' OR Status LIKE 'Rejeitada' OR Status LIKE 'Cancelada')
+);
+
+CREATE TABLE Atividade (
+    ID INT not null IDENTITY(1,1)
+    ,Titulo CHAR not null
+    ,Descricao CHAR
+    ,Conteudo CHAR not null
+    ,Tipo CHAR not null
+    ,Extras CHAR
+    ,IdProfessor INT not null
+    ,CONSTRAINT pkAtividade PRIMARY KEY (ID)
+    ,CONSTRAINT uqTitulo UNIQUE (Titulo)
+    ,CONSTRAINT ckTipo CHECK (Tipo LIKE 'Resposta Aberta' OR Tipo LIKE 'Teste')
+    ,CONSTRAINT fkIdProf FOREIGN KEY (IdProfessor) REFERENCES Professor(ID)
+);
+
+CREATE TABLE AtividadeVinculada (
+    ID INT not null IDENTITY(1,1)
+    ,IdAtividade INT not null 
+    ,IdProfessor INT not null
+    ,IdDisciplinaOfertada INT not null
+    ,Rotulo CHAR not null
+    ,Status CHAR not null
+    ,DtInicioRespostas DATE not null
+    ,DtFimRespostas DATE not null
+    ,CONSTRAINT pkAtividadeVinculada PRIMARY KEY (ID)
+    ,CONSTRAINT fkIdAtividade FOREIGN KEY (IdAtividade) REFERENCES Atividade (ID)
+    ,CONSTRAINT fkIdProfe FOREIGN KEY (IdProfessor) REFERENCES Professor (ID)
+    ,CONSTRAINT fkIdDiscipOfertad FOREIGN KEY(IdDisciplinaOfertada) REFERENCES DisplinaOfertada (ID)
+    ,CONSTRAINT uqAtividadeVinculada UNIQUE (IdAtividade, IdDisciplinaOfertada,Rotulo)
+    ,CONSTRAINT ckStatu CHECK (Status LIKE 'Disponibilizada' OR Status LIKE 'Aberta' OR Status LIKE 'Fechada' OR Status LIKE 'Encerrada' OR Status LIKE 'Programada')
+);
+
+CREATE TABLE Entrega0 (
+    ID INT not null IDENTITY(1,1)
+    ,IdAluno INT not null
+    ,IdAtividadeVinculada INT not null
+    ,Titulo CHAR not NULL
+    ,Resposta CHAR not null
+    ,DtEntrega DATETIME not null CONSTRAINT dfDtEntre DEFAULT(GETDATE())
+    ,IdProfessor INT 
+    ,Nota TINYINT
+    ,DtAvaliação DATETIME
+    ,OBS CHAR
+    ,Status CHAR not null CONSTRAINT dfStatuss DEFAULT'Entregue'
+    ,CONSTRAINT pkEnt PRIMARY KEY (ID)
+    ,CONSTRAINT fkIdAl FOREIGN KEY (IdAluno) REFERENCES Aluno (ID)
+    ,CONSTRAINT ckStatt CHECK (Status LIKE 'Entregue' OR Status LIKE 'Corridigo')
+    ,CONSTRAINT fkIdProff FOREIGN KEY (IdProfessor) REFERENCES Professor(ID)
+    ,CONSTRAINT ckNott CHECK (Nota BETWEEN 0.00 AND 10.00)
+);
+
+CREATE TABLE Mensagem (
+    ID INT not null IDENTITY(1,1)
+    ,IdAluno INT not null
+    ,Assunto CHAR not null
+    ,Referencia CHAR not null
+    ,Conteudo CHAR
+    ,Status CHAR not null
+    ,DtEnvio DATETIME not null
+    ,DtResposta DATETIME
+    ,Resposta CHAR
+    ,CONSTRAINT pkIdAlu FOREIGN KEY (IdAluno) REFERENCES Aluno (ID)
+    ,CONSTRAINT pkMensagem PRIMARY KEY(ID)
+    ,CONSTRAINT ckcondicao CHECK (Status LIKE 'Enviado' OR Status LIKE 'Lido' OR Status LIKE 'Respondido')
+);
