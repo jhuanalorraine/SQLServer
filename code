@@ -1,3 +1,8 @@
+CREATE DATABASE ESCOLA
+GO
+USE ESCOLA
+GO
+
 CREATE TABLE Usuario (
 	ID INT not null identity (1,1)
 	,Login CHAR not null
@@ -6,6 +11,7 @@ CREATE TABLE Usuario (
 	,CONSTRAINT pkUsuario PRIMARY KEY (ID)
 	,CONSTRAINT uqLogin UNIQUE(Login)
 );
+GO
 
 CREATE TABLE Coordenador (
     ID INT not null identity(1,1)
@@ -17,6 +23,7 @@ CREATE TABLE Coordenador (
     ,CONSTRAINT fkEmprestimo FOREIGN KEY (Id_usuario) references Usuario(ID)
     ,CONSTRAINT uqCoordenador UNIQUE (Email, Celular)
 );
+GO
 
 CREATE TABLE Aluno (
     ID INT not null identity (1,1)
@@ -30,6 +37,7 @@ CREATE TABLE Aluno (
     ,CONSTRAINT fkAluno FOREIGN KEY (Id_usuario) REFERENCES Usuario(ID)
     ,CONSTRAINT uqAluno UNIQUE (Email, Celular)
 );
+GO
 
 CREATE TABLE Professor(
     ID INT not null identity (1,1)
@@ -41,6 +49,7 @@ CREATE TABLE Professor(
     ,CONSTRAINT fkProfessor FOREIGN KEY (Id_usuario) REFERENCES Usuario(ID)
     ,CONSTRAINT uqProfessor UNIQUE (Email, Celular)
 );
+GO
 
 CREATE TABLE Disciplina (
     ID INT not null IDENTITY(1,1)
@@ -66,6 +75,7 @@ CREATE TABLE Disciplina (
     ,CONSTRAINT ckPercentualTeorico CHECK (PercentualTeorico BETWEEN 00 AND 100)
     ,CONSTRAINT ckStatus CHECK (Status LIKE 'Aberto' OR Status LIKE 'Fechada')
 );
+GO
 
 CREATE TABLE CURSO (
     ID INT not null 
@@ -73,6 +83,7 @@ CREATE TABLE CURSO (
     ,CONSTRAINT pkCurso PRIMARY KEY (ID)
     ,CONSTRAINT uqNome UNIQUE (Nome)
 );
+GO
 
 CREATE TABLE DisplinaOfertada (
     ID INT not null
@@ -98,6 +109,7 @@ CREATE TABLE DisplinaOfertada (
     ,CONSTRAINT ckSemestre CHECK (Semestre BETWEEN 1 AND 2)
     ,CONSTRAINT ckTurma CHECK (Turma BETWEEN 'a' AND 'z')
 );
+GO
 
 CREATE TABLE SolicitacaoMatricula (
     ID INT not null IDENTITY(1,1)
@@ -112,6 +124,7 @@ CREATE TABLE SolicitacaoMatricula (
     ,CONSTRAINT fkIdCoorden FOREIGN KEY (IdCoordenador) REFERENCES Coordenador(ID)
     ,CONSTRAINT ckStat CHECK (Status LIKE 'Solicitada' OR Status LIKE 'Aprovada' OR Status LIKE 'Rejeitada' OR Status LIKE 'Cancelada')
 );
+GO
 
 CREATE TABLE Atividade (
     ID INT not null IDENTITY(1,1)
@@ -126,6 +139,7 @@ CREATE TABLE Atividade (
     ,CONSTRAINT ckTipo CHECK (Tipo LIKE 'Resposta Aberta' OR Tipo LIKE 'Teste')
     ,CONSTRAINT fkIdProf FOREIGN KEY (IdProfessor) REFERENCES Professor(ID)
 );
+GO
 
 CREATE TABLE AtividadeVinculada (
     ID INT not null IDENTITY(1,1)
@@ -143,6 +157,7 @@ CREATE TABLE AtividadeVinculada (
     ,CONSTRAINT uqAtividadeVinculada UNIQUE (IdAtividade, IdDisciplinaOfertada,Rotulo)
     ,CONSTRAINT ckStatu CHECK (Status LIKE 'Disponibilizada' OR Status LIKE 'Aberta' OR Status LIKE 'Fechada' OR Status LIKE 'Encerrada' OR Status LIKE 'Programada')
 );
+GO
 
 CREATE TABLE Entrega0 (
     ID INT not null IDENTITY(1,1)
@@ -162,6 +177,7 @@ CREATE TABLE Entrega0 (
     ,CONSTRAINT fkIdProff FOREIGN KEY (IdProfessor) REFERENCES Professor(ID)
     ,CONSTRAINT ckNott CHECK (Nota BETWEEN 0.00 AND 10.00)
 );
+GO
 
 CREATE TABLE Mensagem (
     ID INT not null IDENTITY(1,1)
@@ -177,3 +193,4 @@ CREATE TABLE Mensagem (
     ,CONSTRAINT pkMensagem PRIMARY KEY(ID)
     ,CONSTRAINT ckcondicao CHECK (Status LIKE 'Enviado' OR Status LIKE 'Lido' OR Status LIKE 'Respondido')
 );
+GO
